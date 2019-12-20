@@ -16,6 +16,7 @@ char eepromSSID[32] = "SSID";
 char eepromPassword[32] = "password";
 char apSSID[20] = "Smart Distiller";
 char apPassword[20] = "vp.altukhov.project";
+unsigned long millis_overload = 4294967295; //Максимальное значение беззнакового 32 битного числа
 unsigned long millis_loopGetData;
 unsigned long millis_loopDisplay;
 unsigned int disp = 0;
@@ -24,9 +25,10 @@ float sensorValue[5] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 
 U8G2_SSD1306_128X32_UNIVISION_F_SW_I2C u8g2(U8G2_R0, /* clock=*/ 5, /* data=*/ 4, /* reset=*/ 16);
 
+//Получаем список доступных WiFi сетей
 bool scanWiFi(String ssid) {
   WiFi.disconnect(); // обрываем WIFI соединения
-  WiFi.softAPdisconnect(); // отключаем отчку доступа(если она была
+  WiFi.softAPdisconnect(); // отключаем точку доступа, если она была
   WiFi.mode(WIFI_OFF); // отключаем WIFI
   WiFi.mode(WIFI_STA);
   delay(500);
@@ -48,6 +50,7 @@ bool scanWiFi(String ssid) {
   return result;
 }
 
+//Получаем список доступных датчиков температуры
 void scanSensors() {
   Sensor sensor;
   sensorCount = 0;
@@ -61,6 +64,7 @@ void scanSensors() {
   sensors = "{\"Sensors\":" + sensors + "]}";
 }
 
+//Обрабатываем root запрос
 void handleRoot() {
   char temp[128];
   int sec = millis() / 1000;
@@ -71,18 +75,22 @@ void handleRoot() {
   server.send(200, "application/json", temp);
 }
 
+//Обрабатываем запрос работоспособности
 void handlePing() {
   server.send(200, "application/json", "{\"uid\":\"" + String(WiFi.macAddress()) + "\"}");
 }
 
+//Ообрабатываем запрос списка доступных WiFi сетей
 void handleNetworks() {
   server.send(200, "application/json", wifiPoints);
 }
 
+//Обрабатываем запрос досупных датчиков
 void handleSensors() {
   server.send(200, "application/json", sensors);
 }
 
+//Устанавливаем ssid выбранной точки доступа
 void setSSID(String val) {
   for (int i = 0; i < 32; i++) {
     if (i < val.length()) eepromSSID[i] = val[i];
@@ -90,6 +98,7 @@ void setSSID(String val) {
   }
 }
 
+//Устанавливаем password выбранной точки доступа
 void setPassword(String val) {
   for (int i = 0; i < 32; i++) {
     if (i < val.length()) eepromPassword[i] = val[i];
@@ -97,6 +106,7 @@ void setPassword(String val) {
   }
 }
 
+//Обрабатываем запрос получения данных датчика
 void handleValue() {
   String json = "{\"Chip\":\"\",\"Code\":\"\",\"Celsius\":\"\"}";
   Sensor sensor;
@@ -113,6 +123,7 @@ void handleValue() {
   server.send ( 200, "application/json", json );
 }
 
+//Обрабатываем запрос установки параметров выбранной точки доступа
 void handleSetWiFi() {
   char buf[32] = "";
   EEPROM.begin(64);
@@ -131,9 +142,9 @@ void handleSetWiFi() {
   setWiFi();
 }
 
+//Инициализируеп WiFi и Web сервер
 void setWiFi() {
   EEPROM.begin(64);
-  //EEPROM.put(0, String("").c_str());
   EEPROM.get(0, eepromSSID);
   EEPROM.get(32, eepromPassword);
   EEPROM.end();
@@ -189,6 +200,7 @@ void setWiFi() {
   server.begin();
 }
 
+//Отображаем ssid и IP адрес на экране
 void printSSIDandIP() {
   u8g2.clearBuffer();
   u8g2.drawStr(0, 15, currentSSID.c_str());
@@ -196,6 +208,7 @@ void printSSIDandIP() {
   u8g2.sendBuffer();
 }
 
+//Отображаем MAC адрес на экране
 void printMAC() {
   String mac = String(WiFi.macAddress());
   mac.remove(14, 1);
@@ -208,6 +221,7 @@ void printMAC() {
   u8g2.sendBuffer();
 }
 
+//Отображаем данные с датчика на экране
 void printSensorValue(unsigned int i) {
   u8g2.clearBuffer();
   u8g2.drawStr(0, 15, String("Sensor " + String(i + 1)).c_str());
@@ -228,6 +242,10 @@ void setup() {
 }
 
 void loop() {
+  //Учитываем возможность переполнения millis
+  if (millis_loopGetData >= millis_overload) millis_loopGetData = millis();
+  if (millis_loopDisplay >= millis_overload) millis_loopDisplay = millis();
+  
   if (millis_loopGetData < millis()) {
     millis_loopGetData = millis() + 2000;
     scanSensors();
