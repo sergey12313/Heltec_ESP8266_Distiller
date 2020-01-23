@@ -4,8 +4,9 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <EEPROM.h>
-#include <U8g2lib.h>
+#include <LiquidCrystal_I2C.h>
 
+LiquidCrystal_I2C lcd(0x3F, 16, 2);
 ESP8266WebServer server(80);
 
 String wifiPoints;
@@ -23,7 +24,7 @@ unsigned int disp = 0;
 unsigned int sensorCount = 0;
 float sensorValue[5] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 
-U8G2_SSD1306_128X32_UNIVISION_F_SW_I2C u8g2(U8G2_R0, /* clock=*/ 5, /* data=*/ 4, /* reset=*/ 16);
+
 
 //Получаем список доступных WiFi сетей
 bool scanWiFi(String ssid) {
@@ -157,8 +158,10 @@ void setWiFi() {
   bool exist = scanWiFi(String(eepromSSID));
   delay(1000);
 
-  u8g2.clearBuffer();
-  u8g2.drawStr(0,15,"Initialization WiFi");
+//  u8g2.clearBuffer();
+  lcd.setCursor(0, 0);
+  lcd.print("Init WiFi");
+//  u8g2.drawStr(0,15,"Initialization WiFi");
 
   if (exist) {
     WiFi.mode(WIFI_STA);
@@ -167,8 +170,9 @@ void setWiFi() {
   
     int i = 0;
     while (WiFi.status() != WL_CONNECTED && i < 60) {
-      u8g2.drawStr(i*5,32,".");
-      u8g2.sendBuffer();
+      
+      lcd.setCursor(10, 0);
+      lcd.print(String(i);
       delay(1000);
       i++;
     }
@@ -202,10 +206,12 @@ void setWiFi() {
 
 //Отображаем ssid и IP адрес на экране
 void printSSIDandIP() {
-  u8g2.clearBuffer();
-  u8g2.drawStr(0, 15, currentSSID.c_str());
-  u8g2.drawStr(0, 32, currentIP.toString().c_str());
-  u8g2.sendBuffer();
+  lcd.clear()
+  lcd.setCursor(0, 0); 
+  lcd.print(currentSSID.c_str());
+   lcd.setCursor(0, 1);
+   lcd.print(currentIP.toString().c_str())
+
 }
 
 //Отображаем MAC адрес на экране
@@ -215,27 +221,31 @@ void printMAC() {
   mac.remove(8, 1);
   mac.remove(2, 1);
   mac.replace(":", ".");
-  u8g2.clearBuffer();
-  u8g2.drawStr(0, 15, "MAC address:");
-  u8g2.drawStr(0, 32, mac.c_str());
-  u8g2.sendBuffer();
+
+  lcd.clear()
+  lcd.setCursor(0, 0); 
+  lcd.print("MAC:");
+  lcd.setCursor(4, 0);
+  lcd.print(mac.c_str())
 }
 
 //Отображаем данные с датчика на экране
 void printSensorValue(unsigned int i) {
-  u8g2.clearBuffer();
-  u8g2.drawStr(0, 15, String("Sensor " + String(i + 1)).c_str());
-  u8g2.drawStr(0, 32, String(String(sensorValue[i]) + char(176) + "C").c_str());
-  u8g2.sendBuffer();
+    lcd.clear()
+     lcd.setCursor(0, 0); 
+  lcd.print(String("Sensor " + String(i + 1)).c_str());
+  lcd.setCursor(0, 1); 
+  lcd.print(String(String(sensorValue[i]) + char(176) + "C").c_str());
+
 }
 
 void setup() {
   Serial.begin(115200);
 
-  u8g2.begin();
-  u8g2.clearBuffer();
-  u8g2.setFont(u8g2_font_crox3h_tf);
-
+  lcd.begin(16,2);
+  lcd.init();
+  lcd.backlight();
+  lcd.clear()
   setWiFi();
 
   millis_loopDisplay = millis() + 10000;
