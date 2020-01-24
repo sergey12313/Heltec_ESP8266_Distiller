@@ -37,3 +37,4 @@ http://192.168.4.1/ssid?ssid=[ssid]&password=[password]
 
 Файлы Sensor.h и Sensor.cpp необходимо поместить в папку \libraries\Sensor созданную в каталоге где храняться проекты Arduino IDE
 
+В Sensor.cpp необходимо указать порт, который будет использоваться для подключения датчиков температуры OneWire ds(XX);
