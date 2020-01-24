@@ -158,10 +158,10 @@ void setWiFi() {
   bool exist = scanWiFi(String(eepromSSID));
   delay(1000);
 
-//  u8g2.clearBuffer();
+
+  lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print("Init WiFi");
-//  u8g2.drawStr(0,15,"Initialization WiFi");
+  lcd.print("Init WiFi:");
 
   if (exist) {
     WiFi.mode(WIFI_STA);
@@ -169,10 +169,15 @@ void setWiFi() {
     WiFi.begin(ssid, password);
   
     int i = 0;
+    String strCounter = "00";
     while (WiFi.status() != WL_CONNECTED && i < 60) {
-      
-      lcd.setCursor(10, 0);
-      lcd.print(String(i));
+      if(i < 10) {
+        strCounter = "0" + String(i);
+      } else {
+        strCounter = String(i);
+      }
+      lcd.setCursor(0, 1);
+      lcd.print("attempt: " + strCounter);
       delay(1000);
       i++;
     }
