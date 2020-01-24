@@ -15,8 +15,8 @@ String currentSSID;
 IPAddress currentIP;
 char eepromSSID[32] = "SSID";
 char eepromPassword[32] = "password";
-char apSSID[20] = "Smart Distiller";
-char apPassword[20] = "vp.altukhov.project";
+char apSSID[20] = "SmartDistiller";
+char apPassword[20] = "password";
 unsigned long millis_overload = 4294967295; //Максимальное значение беззнакового 32 битного числа
 unsigned long millis_loopGetData;
 unsigned long millis_loopDisplay;
@@ -172,7 +172,7 @@ void setWiFi() {
     while (WiFi.status() != WL_CONNECTED && i < 60) {
       
       lcd.setCursor(10, 0);
-      lcd.print(String(i);
+      lcd.print(String(i));
       delay(1000);
       i++;
     }
@@ -206,11 +206,11 @@ void setWiFi() {
 
 //Отображаем ssid и IP адрес на экране
 void printSSIDandIP() {
-  lcd.clear()
+  lcd.clear();
   lcd.setCursor(0, 0); 
   lcd.print(currentSSID.c_str());
    lcd.setCursor(0, 1);
-   lcd.print(currentIP.toString().c_str())
+   lcd.print(currentIP.toString().c_str());
 
 }
 
@@ -222,16 +222,16 @@ void printMAC() {
   mac.remove(2, 1);
   mac.replace(":", ".");
 
-  lcd.clear()
+  lcd.clear();
   lcd.setCursor(0, 0); 
-  lcd.print("MAC:");
-  lcd.setCursor(4, 0);
-  lcd.print(mac.c_str())
+  lcd.print("MAC address:");
+  lcd.setCursor(0, 1);
+  lcd.print(mac.c_str());
 }
 
 //Отображаем данные с датчика на экране
 void printSensorValue(unsigned int i) {
-    lcd.clear()
+    lcd.clear();
      lcd.setCursor(0, 0); 
   lcd.print(String("Sensor " + String(i + 1)).c_str());
   lcd.setCursor(0, 1); 
@@ -245,7 +245,7 @@ void setup() {
   lcd.begin(16,2);
   lcd.init();
   lcd.backlight();
-  lcd.clear()
+  lcd.clear();
   setWiFi();
 
   millis_loopDisplay = millis() + 10000;
