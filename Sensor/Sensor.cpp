@@ -1,6 +1,5 @@
 #include <OneWire.h>
-//OneWire ds(D4);
-OneWire ds(D6);
+OneWire ds(D6); //Необходимо указать порт куда подключены датчики температуры, я использовал D6
 #include <Sensor.h>
 
 bool Sensor::searchSensor() {
