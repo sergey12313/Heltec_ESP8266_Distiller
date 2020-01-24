@@ -28,7 +28,7 @@ http://192.168.4.1/networks
 http://192.168.4.1/sensors
 ответ json: {"Sensors":[{"Chip":"DS18B20","Code":"28FF8A00011703F5","Celsius":"25.88"},{"Chip":"DS18B20","Code":"28FF469E82170407","Celsius":"25.88"},{"Chip":"DS18B20","Code":"28FFA58C81170516","Celsius":"26.81"}]}
 
-5. Получениф данных по датчику
+5. Получение данных по датчику
 http://192.168.4.1/value?uid=28FF8A00011703F5
 ответ json: {"Chip":"DS18B20","Code":"28FF8A00011703F5","Celsius":"25.69"}
 
